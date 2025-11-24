@@ -2,12 +2,11 @@ package employee.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.log4j.Log4j;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "books")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Book {

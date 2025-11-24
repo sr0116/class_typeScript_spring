@@ -1,24 +1,20 @@
 package employee.demo.entity;
 
-
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.log4j.Log4j;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-//@Log4j
+@AllArgsConstructor
 @Builder
 public class User {
 
-
     @Id
-    @Column(name = "user_id" )
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(name = "user_name", nullable = false, length = 50)
@@ -29,5 +25,4 @@ public class User {
 
     @Column(nullable = false)
     private Long age;
-
 }
