@@ -2,9 +2,9 @@ package employee.demo.service;
 
 import employee.demo.dto.OrderRequestDTO;
 import employee.demo.dto.OrderResponseDTO;
+import employee.demo.en.OrderStatus;
 import employee.demo.entity.Book;
 import employee.demo.entity.Order;
-import employee.demo.entity.OrderStatus;
 import employee.demo.entity.User;
 import employee.demo.repository.BookRepository;
 import employee.demo.repository.OrderRepository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -25,7 +24,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
 
     @Override
-    public OrderResponseDTO createOrder(OrderRequestDTO dto) {
+    public OrderResponseDTO create(OrderRequestDTO dto) {
 
         Book book = bookRepository.findById(dto.getBookId())
                 .orElseThrow(() -> new IllegalArgumentException("Book not found"));
@@ -33,58 +32,70 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        Order order = new Order();
-        order.setBook(book);
-        order.setUser(user);
-        order.setQuantity(dto.getQuantity());
-        order.setStatus(OrderStatus.PENDING);  // 기본 상태
+        // 총 금액 계산
+        Long totalPrice = book.getPrice() * dto.getQuantity();
+
+        Order order = Order.builder()
+                .book(book)
+                .user(user)
+                .quantity(dto.getQuantity())
+                .totalPrice(totalPrice)
+                .status(OrderStatus.PENDING)
+                .build();
 
         Order saved = orderRepository.save(order);
 
-        return convertToResponseDTO(saved);
+        return toResponse(saved);
     }
 
-
     @Override
-    public OrderResponseDTO getOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+    public OrderResponseDTO get(Long id) {
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-        return convertToResponseDTO(order);
+        return toResponse(order);
     }
 
-
     @Override
-    public List<OrderResponseDTO> getAllOrders() {
+    public List<OrderResponseDTO> getAll() {
         return orderRepository.findAll()
                 .stream()
-                .map(this::convertToResponseDTO)
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-
     @Override
-    public OrderResponseDTO updateStatus(Long orderId, String status) {
+    public OrderResponseDTO updateStatus(Long id, OrderStatus status) {
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
+        order.setStatus(status);
 
-        order.setStatus(OrderStatus.valueOf(status.toUpperCase()));
+        Order updated = orderRepository.save(order);
 
-        Order saved = orderRepository.save(order);
-
-        return convertToResponseDTO(saved);
+        return toResponse(updated);
     }
 
-    private OrderResponseDTO convertToResponseDTO(Order order) {
+    @Override
+    public void delete(Long id) {
+        if (!orderRepository.existsById(id)) {
+            throw new IllegalArgumentException("Order not found");
+        }
+        orderRepository.deleteById(id);
+    }
+
+    private OrderResponseDTO toResponse(Order order) {
+
         OrderResponseDTO dto = new OrderResponseDTO();
 
-        dto.setOrderId(order.getOrderId());
+        dto.setId(order.getId());
         dto.setBookName(order.getBook().getBookName());
         dto.setUserName(order.getUser().getUserName());
         dto.setQuantity(order.getQuantity());
+        dto.setTotalPrice(order.getTotalPrice());
         dto.setStatus(order.getStatus());
+        dto.setCreatedAt(order.getCreatedAt());
 
         return dto;
     }

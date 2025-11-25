@@ -1,4 +1,4 @@
-package employee.demo.entity;
+package employee.demo.en;
 
 public enum OrderStatus {
   PENDING,      // 주문 대기

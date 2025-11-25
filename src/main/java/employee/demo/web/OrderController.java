@@ -1,12 +1,11 @@
 package employee.demo.web;
 
-
 import employee.demo.dto.OrderRequestDTO;
 import employee.demo.dto.OrderResponseDTO;
-import employee.demo.entity.Order;
-import employee.demo.service.BookService;
+import employee.demo.en.OrderStatus;
 import employee.demo.service.OrderService;
-import employee.demo.service.OrderServiceImpl;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,53 +19,37 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // 조회
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
-
-        List<OrderResponseDTO> orders = orderService.getAllOrders();
-
-        return ResponseEntity.ok(orders);
-    }
-    // 단일 조회
-    @GetMapping("/{orderId}")
-    public ResponseEntity<OrderResponseDTO> getOrder(
-            @PathVariable Long orderId) {
-
-        OrderResponseDTO dto = orderService.getOrder(orderId);
-
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<List<OrderResponseDTO>> getAll() {
+        return ResponseEntity.ok(orderService.getAll());
     }
 
-    // 주문 생성
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderResponseDTO> get(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.get(id));
+    }
+
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(
-            @RequestBody OrderRequestDTO dto) {
-
-        OrderResponseDTO created = orderService.createOrder(dto);
-
-        return ResponseEntity.ok(created);
+    public ResponseEntity<OrderResponseDTO> create(@RequestBody OrderRequestDTO dto) {
+        return ResponseEntity.ok(orderService.create(dto));
     }
-    // 수정
-    @PutMapping("/{orderId}")
+
+    @PutMapping("/{id}/status")
     public ResponseEntity<OrderResponseDTO> updateStatus(
-            @PathVariable Long orderId,
-            @RequestBody StatusRequest statusRequest) {
-
-        OrderResponseDTO updated =
-                orderService.updateStatus(orderId, statusRequest.getStatus());
-
-        return ResponseEntity.ok(updated);
+            @PathVariable Long id,
+            @RequestBody StatusRequest req
+    ) {
+        return ResponseEntity.ok(orderService.updateStatus(id, req.getStatus()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        orderService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @Getter @Setter
     static class StatusRequest {
-        private String status;
-
-        public String getStatus() {
-            return status;
-        }
-        public void setStatus(String status) {
-            this.status = status;
-        }
+        private OrderStatus status;
     }
-
 }

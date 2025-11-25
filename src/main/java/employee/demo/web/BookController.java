@@ -1,38 +1,47 @@
 package employee.demo.web;
 
-
-import employee.demo.entity.Book;
+import employee.demo.dto.BookRequestDTO;
+import employee.demo.dto.BookResponseDTO;
 import employee.demo.service.BookService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/books")
 @RequiredArgsConstructor
-@RequestMapping("/books")
 public class BookController {
+
     private final BookService bookService;
 
-    // 조회
     @GetMapping
-    public ResponseEntity<List<Book>> getAllBooks() {
-//        bookService.findAll();
-        return ResponseEntity.ok().body(bookService.findAll());
+    public ResponseEntity<List<BookResponseDTO>> getAll() {
+        return ResponseEntity.ok(bookService.getAll());
     }
 
-    // 등록
+    @GetMapping("/{id}")
+    public ResponseEntity<BookResponseDTO> get(@PathVariable Long id) {
+        return ResponseEntity.ok(bookService.get(id));
+    }
+
     @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        return ResponseEntity.ok().body(bookService.save(book));
+    public ResponseEntity<BookResponseDTO> create(@RequestBody BookRequestDTO dto) {
+        return ResponseEntity.ok(bookService.create(dto));
     }
 
-    // 삭제
-    @DeleteMapping("/{bookId}")
-    public ResponseEntity<Book> deleteBook(@PathVariable Long bookId) throws IllegalAccessException {
-        bookService.deleteById(bookId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<BookResponseDTO> update(
+            @PathVariable Long id,
+            @RequestBody BookRequestDTO dto
+    ) {
+        return ResponseEntity.ok(bookService.update(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        bookService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }
