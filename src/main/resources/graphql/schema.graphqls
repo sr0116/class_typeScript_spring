@@ -14,7 +14,6 @@ input EmployeeInput {
     language: String!
     pay: Int!
 
-
 }
 
 type Query {
